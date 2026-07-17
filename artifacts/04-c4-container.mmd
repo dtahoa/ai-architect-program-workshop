@@ -1,5 +1,6 @@
 flowchart TB
     %% C4-style container view. The MERLIN and POS boundaries are existing and unchanged.
+    %% Artifact 1 owner: LÊ NGUYỄN SỸ BÌNH (122980, ARD)
 
     CM["Category Manager<br/>&lt;&lt;Person&gt;&gt;"]
     ASSOC["Store Associate<br/>&lt;&lt;Person&gt;&gt;"]
@@ -88,8 +89,8 @@ flowchart TB
 
     CONTROL -->|"Epoch/state and scope"| ORCH
     CONTROL -->|"Current epoch; invalid/unreachable means disabled"| ACCESS
-    ACCESS -->|"Single-run <=60s transaction permit"| OVRADAPTER
-    DUTY -->|"State change; acknowledgement <=30s"| CONTROL
+    ACCESS -->|"Single-run &lt;=60s transaction permit"| OVRADAPTER
+    DUTY -->|"State change; acknowledgement &lt;=30s"| CONTROL
     DUTY -->|"Independent revoke/terminate when ack missing or incident"| BREAKGLASS
     BREAKGLASS -->|"Revoke issuance/access; terminate active sessions"| ACCESS
     BREAKGLASS -->|"Separate certified exact-row cleanup only"| OVTABLE
@@ -121,7 +122,7 @@ flowchart TB
     INDEX -->|"Exact safety field/passage + version"| SAFERENDER
     SAFERENDER -->|"Deterministic cited display or refusal"| EDGE
     INDEX -->|"Signed offline evidence pack"| EDGE
-    EDGE -->|"<2s target: evidence, citation or escalation"| ASSOC
+    EDGE -->|"&lt;2s target: evidence, citation or escalation"| ASSOC
     EDGE -->|"Query class, cited version and outcome"| AUDIT
 
     LOYALTY --- RESNOTE

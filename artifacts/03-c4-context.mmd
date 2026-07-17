@@ -1,5 +1,6 @@
 flowchart LR
     %% C4-style system context: people, systems, authority, trust boundaries, and relationships.
+    %% Artifact 1 owner: LÊ NGUYỄN SỸ BÌNH (122980, ARD)
 
     subgraph PEOPLE ["People"]
         CM["Category Manager<br/>&lt;&lt;Person&gt;&gt;<br/>Reviews risk-ranked MERLIN orders"]
@@ -44,15 +45,14 @@ flowchart LR
     MERLIN -->|"Fixed-schema EDI; AI never sends orders"| SUPPLIERS
 
     CM -->|"Accepts, rejects or edits through native review queue"| MERLIN
-    OPS -->|"Sets new disable epoch; acks <=30s,<br/>reject <=60s, verified safe <=5m"| KILL
-    KILL -->|"Transaction epoch guard and short-lived permit"| SIDECAR
-    KILL -->|"Independent DB/network credential revocation<br/>and active-session termination"| MERLIN
+    OPS -->|"Sets new disable epoch; acks &lt;=30s,<br/>reject &lt;=60s, verified safe &lt;=5m"| KILL
+    KILL -->|"Transaction epoch guard, short-lived permit,<br/>and independent revocation of sidecar adapter access"| SIDECAR
     SIDECAR -->|"Run, model, rules, data and recommendation evidence"| AUDIT
     MERLIN -->|"Order references and review outcomes"| AUDIT
 
     DOCS -->|"Signed approved content and versions"| COPILOT
     MERLIN -->|"Product-master snapshot via supported nightly batch"| COPILOT
-    SIDECAR -->|"Post-generation comparison only from<br/>documented queue/reporting output"| CM
+    SIDECAR -->|"Read-only shadow/promotion view after certified join;<br/>never part of MERLIN's control path"| CM
     COPILOT -->|"Safety: exact approved extract/template + citation;<br/>otherwise refusal/escalation"| ASSOC
     SAFETY -->|"Approves content hierarchy and owns escalation"| DOCS
     COPILOT -->|"Query class, cited versions and outcome"| AUDIT
