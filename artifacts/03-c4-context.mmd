@@ -1,0 +1,74 @@
+flowchart LR
+    %% C4-style system context: people, systems, authority, trust boundaries, and relationships.
+
+    subgraph PEOPLE ["People"]
+        CM["Category Manager<br/>&lt;&lt;Person&gt;&gt;<br/>Reviews risk-ranked MERLIN orders"]
+        ASSOC["Store Associate<br/>&lt;&lt;Person&gt;&gt;<br/>Uses separate copilot device"]
+        OPS["Replenishment / SAP Operations<br/>&lt;&lt;Person&gt;&gt;<br/>Owns batch and kill switch"]
+        SAFETY["Food-Safety Content Owner<br/>&lt;&lt;Person&gt;&gt;<br/>Approves sources and escalation"]
+    end
+
+    subgraph ONPREM ["NovaMart on-premises legacy trust boundary"]
+        POS["Legacy POS estate<br/>&lt;&lt;Existing System&gt;&gt;<br/>Untouched, offline-first<br/>Authoritative transaction capture"]
+        DW["Data Warehouse<br/>&lt;&lt;Existing System&gt;&gt;<br/>Nightly, up to 24h stale"]
+        MERLIN["MERLIN ERP<br/>&lt;&lt;System of Record&gt;&gt;<br/>Authoritative for merchandising, replenishment,<br/>supplier orders and fixed-schema EDI"]
+        DOCS["Governed SOP and Product Content<br/>&lt;&lt;Authoritative Source Candidate&gt;&gt;<br/>Approved versions; hierarchy pending OQ-08"]
+    end
+
+    subgraph AIBOUNDARY ["NovaMart AI retrofit trust boundary - isolated from POS revenue path"]
+        SIDECAR["Fail-open AI Sidecar<br/>&lt;&lt;Advisory System&gt;&gt;<br/>Forecast ML plus deterministic optimization<br/>No direct supplier-order authority"]
+        COPILOT["Associate Copilot Pilot<br/>&lt;&lt;Advisory System&gt;&gt;<br/>Deterministic safety display; LLM non-safety only<br/>Signed offline cache and safe refusal"]
+        KILL["Fail-Safe Publication Latch<br/>&lt;&lt;Control System&gt;&gt;<br/>Monotonic epoch, expiring permits,<br/>independent credential/session revocation"]
+        AUDIT["Model and Decision Audit<br/>&lt;&lt;System&gt;&gt;<br/>Append-only provenance"]
+    end
+
+    subgraph RESIDENCY ["Country-local personal-data trust boundary"]
+        LOYALTY["Loyalty Platform<br/>&lt;&lt;Existing System&gt;&gt;<br/>Personal data stays in country"]
+        RESNOTE["Release 1: no member-level loyalty export<br/>and no personal features in regional sidecar"]
+    end
+
+    subgraph EXTERNAL ["External trust boundary"]
+        THIRD["Weather, event and calendar providers<br/>&lt;&lt;Non-authoritative Systems&gt;&gt;"]
+        SUPPLIERS["2,300 Suppliers<br/>&lt;&lt;External Systems&gt;&gt;<br/>Fixed EDI schema and 04:00 cut-off"]
+    end
+
+    POS -->|"Existing nightly sync; never calls AI"| MERLIN
+    POS -->|"Existing ETL; aggregated history"| DW
+    MERLIN -->|"Supported nightly-batch snapshot only"| SIDECAR
+    DW -->|"Approved, immutable aggregate snapshot"| SIDECAR
+    THIRD -->|"Validated non-authoritative features"| SIDECAR
+
+    SIDECAR -->|"Supported current-run override-table writes only"| MERLIN
+    SIDECAR -->|"Supported review-queue risk context only"| MERLIN
+    MERLIN -->|"Supported post-generation order ID/quantity only if certified;<br/>otherwise influence stays disabled"| SIDECAR
+    MERLIN -->|"Fixed-schema EDI; AI never sends orders"| SUPPLIERS
+
+    CM -->|"Accepts, rejects or edits through native review queue"| MERLIN
+    OPS -->|"Sets new disable epoch; acks <=30s,<br/>reject <=60s, verified safe <=5m"| KILL
+    KILL -->|"Transaction epoch guard and short-lived permit"| SIDECAR
+    KILL -->|"Independent DB/network credential revocation<br/>and active-session termination"| MERLIN
+    SIDECAR -->|"Run, model, rules, data and recommendation evidence"| AUDIT
+    MERLIN -->|"Order references and review outcomes"| AUDIT
+
+    DOCS -->|"Signed approved content and versions"| COPILOT
+    MERLIN -->|"Product-master snapshot via supported nightly batch"| COPILOT
+    SIDECAR -->|"Post-generation comparison only from<br/>documented queue/reporting output"| CM
+    COPILOT -->|"Safety: exact approved extract/template + citation;<br/>otherwise refusal/escalation"| ASSOC
+    SAFETY -->|"Approves content hierarchy and owns escalation"| DOCS
+    COPILOT -->|"Query class, cited versions and outcome"| AUDIT
+
+    LOYALTY --- RESNOTE
+
+    classDef person fill:#fff4cc,stroke:#7a5d00,color:#1f1f1f;
+    classDef authoritative fill:#d9ead3,stroke:#274e13,color:#1f1f1f,stroke-width:2px;
+    classDef existing fill:#d9eaf7,stroke:#134f5c,color:#1f1f1f;
+    classDef ai fill:#e8def8,stroke:#4c2c72,color:#1f1f1f;
+    classDef external fill:#f3f3f3,stroke:#666,color:#1f1f1f;
+    classDef warning fill:#fce5cd,stroke:#b45f06,color:#1f1f1f;
+
+    class CM,ASSOC,OPS,SAFETY person;
+    class MERLIN,DOCS authoritative;
+    class POS,DW,LOYALTY existing;
+    class SIDECAR,COPILOT,KILL,AUDIT ai;
+    class THIRD,SUPPLIERS external;
+    class RESNOTE warning;

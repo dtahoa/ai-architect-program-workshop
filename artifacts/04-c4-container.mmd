@@ -1,0 +1,141 @@
+flowchart TB
+    %% C4-style container view. The MERLIN and POS boundaries are existing and unchanged.
+
+    CM["Category Manager<br/>&lt;&lt;Person&gt;&gt;"]
+    ASSOC["Store Associate<br/>&lt;&lt;Person&gt;&gt;"]
+    DUTY["Replenishment / SAP Duty Manager<br/>&lt;&lt;Person&gt;&gt;"]
+    SAFETY["Food-Safety Content Owner<br/>&lt;&lt;Person&gt;&gt;"]
+    SUPPLIER["2,300 Suppliers<br/>&lt;&lt;External Systems&gt;&gt;"]
+    EXT["Weather, event and calendar feeds<br/>&lt;&lt;External, non-authoritative&gt;&gt;"]
+
+    subgraph LEGACY ["On-premises legacy trust boundary - unchanged"]
+        POS["Legacy POS<br/>&lt;&lt;Existing System&gt;&gt;<br/>Offline-first; 99.99%; untouched"]
+        DW["Data Warehouse<br/>&lt;&lt;Existing Container&gt;&gt;<br/>Nightly ETL; up to 24h stale"]
+
+        subgraph MERLINZONE ["MERLIN ERP trust boundary - authoritative for supplier orders"]
+            MERLIN["MERLIN ERP Core<br/>&lt;&lt;Existing System of Record&gt;&gt;"]
+            MBATCH["Existing Nightly Batch<br/>&lt;&lt;Supported Extension Point 3&gt;&gt;"]
+            OVTABLE["Override Table<br/>&lt;&lt;Supported Extension Point 1&gt;&gt;<br/>Read before order generation"]
+            ENGINE["Legacy Min/Max Replenishment Engine<br/>&lt;&lt;Existing Container&gt;&gt;<br/>Unmodified"]
+            REVIEWQ["Category-Manager Review Queue<br/>&lt;&lt;Supported Extension Point 2&gt;&gt;<br/>After order generation"]
+            EDI["Supplier EDI Connector<br/>&lt;&lt;Existing Container&gt;&gt;<br/>Fixed schema; 04:00 cut-off"]
+        end
+
+        GOVDOCS["Governed SOP / Food-Safety Repository<br/>&lt;&lt;Authoritative Source Candidate&gt;&gt;<br/>Versioned; hierarchy pending OQ-08"]
+    end
+
+    subgraph AIZONE ["AI sidecar trust boundary - asynchronous and fail-open"]
+        ORCH["Deadline-Aware Batch Orchestrator<br/>&lt;&lt;Container&gt;&gt;<br/>Retry stop 01:30; publish close 02:00"]
+        INGEST["Data Ingestion and Validation<br/>&lt;&lt;Container&gt;&gt;<br/>Immutable snapshots, schema, freshness,<br/>completeness and residency gates"]
+        FEATURES["Feature Pipeline<br/>&lt;&lt;Container&gt;&gt;<br/>Store-SKU features and inventory-uncertainty bands"]
+        FORECAST["Forecasting Service<br/>&lt;&lt;Container&gt;&gt;<br/>Statistical ML; quantiles and confidence<br/>No LLM"]
+        OPTIMIZER["Replenishment Optimization Service<br/>&lt;&lt;Container&gt;&gt;<br/>Deterministic constraints and rules<br/>No LLM"]
+        RECSTORE["Recommendation / Override Store<br/>&lt;&lt;Container&gt;&gt;<br/>Absolute caps; no current MERLIN baseline<br/>run manifest, expiry and risk rank"]
+        OVRADAPTER["MERLIN Override-Table Adapter<br/>&lt;&lt;Container&gt;&gt;<br/>Supported staging/activation or measured direct cap<br/>same-transaction epoch guard"]
+        REVIEWADAPTER["MERLIN Review-Queue Integration<br/>&lt;&lt;Container&gt;&gt;<br/>Post-generation order ID/quantity join<br/>capacity-capped risk context"]
+        REGISTRY["Model and Rules Registry<br/>&lt;&lt;Container&gt;&gt;<br/>Approved versions and deployment status"]
+        AUDIT["Immutable Audit Log<br/>&lt;&lt;Container&gt;&gt;<br/>Data, model, rules, decisions, actors and transactions"]
+        MONITOR["Monitoring and Alerting<br/>&lt;&lt;Container&gt;&gt;<br/>Deadline, quality, drift, cost and queue signals"]
+        CONTROL["Durable Publication Latch<br/>&lt;&lt;Container&gt;&gt;<br/>Monotonic epoch, deny default,<br/>signed expiring permits and state machine"]
+        ACCESS["Credential / DB-Network Access Gateway<br/>&lt;&lt;Container&gt;&gt;<br/>No standing writer; permit issuance,<br/>revocation and session termination"]
+        BREAKGLASS["Independent SAP Break-Glass Stop<br/>&lt;&lt;Container&gt;&gt;<br/>Separate authority and cleanup identity"]
+        ANALYSIS["Shadow and Promotion Analysis View<br/>&lt;&lt;Container&gt;&gt;<br/>Comparison only after documented<br/>post-generation output"]
+    end
+
+    subgraph COPILOTZONE ["Associate-copilot pilot boundary - separate from POS and ordering"]
+        CONTENT["Governed Content Publisher<br/>&lt;&lt;Container&gt;&gt;<br/>Signs approved document and product snapshots"]
+        INDEX["Evidence Index<br/>&lt;&lt;Container&gt;&gt;<br/>Versioned passages and product facts"]
+        LANGUAGE["Non-Safety Language Service<br/>&lt;&lt;Container&gt;&gt;<br/>Intent/entities and non-safety assistance only<br/>Never composes safety output"]
+        SAFERENDER["Deterministic Safety Renderer<br/>&lt;&lt;Container&gt;&gt;<br/>Exact approved field/passage + fixed template<br/>citation, or refusal/escalation"]
+        EDGE["Store-Local Copilot Cache and Retrieval<br/>&lt;&lt;Container&gt;&gt;<br/>Signed offline evidence and templates; no POS link"]
+    end
+
+    subgraph COUNTRY ["Country-local personal-data boundary"]
+        LOYALTY["Loyalty PII Store<br/>&lt;&lt;Existing Container&gt;&gt;<br/>No Release 1 export or model feature"]
+        RESNOTE["Residency control:<br/>member-level data stays in country"]
+    end
+
+    POS -->|"Existing nightly sync"| MBATCH
+    POS -->|"Existing aggregate ETL"| DW
+    MERLIN --- MBATCH
+    MBATCH -->|"Existing processing"| ENGINE
+    OVTABLE -->|"Read before generation"| ENGINE
+    ENGINE -->|"Generated risk exceptions"| REVIEWQ
+    ENGINE -->|"Normal generated orders"| EDI
+    REVIEWQ -->|"Native release or correction"| EDI
+    EDI -->|"Fixed-schema supplier orders before 04:00"| SUPPLIER
+    CM -->|"Reviews only admitted exceptions"| REVIEWQ
+
+    MBATCH -->|"Extension 3: read-only dated snapshot and start signal"| INGEST
+    DW -->|"Approved aggregate snapshot"| INGEST
+    EXT -->|"Validated optional features"| INGEST
+    ORCH -->|"Starts and enforces gates"| INGEST
+    INGEST -->|"Validated snapshot ID"| FEATURES
+    FEATURES -->|"Versioned batch features"| FORECAST
+    REGISTRY -->|"Approved model version"| FORECAST
+    FORECAST -->|"Forecast quantiles and confidence"| OPTIMIZER
+    REGISTRY -->|"Approved constraint and ruleset version"| OPTIMIZER
+    FEATURES -->|"Inventory uncertainty, case pack, shelf life and capacity"| OPTIMIZER
+    OPTIMIZER -->|"Absolutely bounded recommendation plus reason codes"| RECSTORE
+    RECSTORE -->|"Complete current-run manifest before 01:45"| OVRADAPTER
+    OVRADAPTER -->|"Extension 1: staged+constant activation if supported;<br/>otherwise measured direct transaction; closes 02:00"| OVTABLE
+    RECSTORE -->|"Recommendation, exact publish keys and risk facts"| REVIEWADAPTER
+    REVIEWQ -->|"Extension 2: documented generated order ID,<br/>quantity and correlation keys"| REVIEWADAPTER
+    REVIEWADAPTER -->|"Extension 2: joined capacity-capped annotations"| REVIEWQ
+    RECSTORE -->|"Uncompared recommendation and promotion output"| ANALYSIS
+    REVIEWADAPTER -->|"Certified post-generation join only"| ANALYSIS
+    ANALYSIS -->|"Read-only planning and feedback"| CM
+
+    CONTROL -->|"Epoch/state and scope"| ORCH
+    CONTROL -->|"Current epoch; invalid/unreachable means disabled"| ACCESS
+    ACCESS -->|"Single-run <=60s transaction permit"| OVRADAPTER
+    DUTY -->|"State change; acknowledgement <=30s"| CONTROL
+    DUTY -->|"Independent revoke/terminate when ack missing or incident"| BREAKGLASS
+    BREAKGLASS -->|"Revoke issuance/access; terminate active sessions"| ACCESS
+    BREAKGLASS -->|"Separate certified exact-row cleanup only"| OVTABLE
+
+    INGEST -->|"Snapshot validation evidence"| AUDIT
+    FORECAST -->|"Model, inputs, outputs and confidence"| AUDIT
+    OPTIMIZER -->|"Rules, constraints and recommendation"| AUDIT
+    OVRADAPTER -->|"Transaction, checksum and affected keys"| AUDIT
+    REVIEWADAPTER -->|"Queue item and decision reference"| AUDIT
+    REVIEWQ -->|"Human decision and MERLIN order reference"| AUDIT
+    CONTROL -->|"Epoch, state, actor, reason, scope and acknowledgements"| AUDIT
+    ACCESS -->|"Permit, revocation and session evidence"| AUDIT
+    BREAKGLASS -->|"Independent stop and cleanup evidence"| AUDIT
+
+    ORCH -.->|"Timing and completion metrics"| MONITOR
+    INGEST -.->|"Freshness, row count and schema metrics"| MONITOR
+    FORECAST -.->|"WAPE, drift and confidence metrics"| MONITOR
+    OPTIMIZER -.->|"Constraint and suppression metrics"| MONITOR
+    OVRADAPTER -.->|"Write latency, locks and rollback metrics"| MONITOR
+    REVIEWQ -.->|"Backlog, expiry and rejection metrics"| MONITOR
+    MONITOR -->|"Pages and dashboards"| DUTY
+
+    GOVDOCS -->|"Approved signed versions"| CONTENT
+    MBATCH -->|"Extension 3: read-only product-master snapshot"| CONTENT
+    SAFETY -->|"Approves hierarchy and escalation policy"| CONTENT
+    CONTENT --> INDEX
+    INDEX -->|"Non-safety retrieved evidence only"| LANGUAGE
+    LANGUAGE -->|"Non-safety cited response"| EDGE
+    INDEX -->|"Exact safety field/passage + version"| SAFERENDER
+    SAFERENDER -->|"Deterministic cited display or refusal"| EDGE
+    INDEX -->|"Signed offline evidence pack"| EDGE
+    EDGE -->|"<2s target: evidence, citation or escalation"| ASSOC
+    EDGE -->|"Query class, cited version and outcome"| AUDIT
+
+    LOYALTY --- RESNOTE
+
+    classDef person fill:#fff4cc,stroke:#7a5d00,color:#1f1f1f;
+    classDef authoritative fill:#d9ead3,stroke:#274e13,color:#1f1f1f,stroke-width:2px;
+    classDef legacy fill:#d9eaf7,stroke:#134f5c,color:#1f1f1f;
+    classDef ai fill:#e8def8,stroke:#4c2c72,color:#1f1f1f;
+    classDef external fill:#f3f3f3,stroke:#666,color:#1f1f1f;
+    classDef warning fill:#fce5cd,stroke:#b45f06,color:#1f1f1f;
+
+    class CM,ASSOC,DUTY,SAFETY person;
+    class MERLIN,OVTABLE,REVIEWQ,EDI,GOVDOCS authoritative;
+    class POS,DW,MBATCH,ENGINE,LOYALTY legacy;
+    class ORCH,INGEST,FEATURES,FORECAST,OPTIMIZER,RECSTORE,OVRADAPTER,REVIEWADAPTER,REGISTRY,AUDIT,MONITOR,CONTROL,ACCESS,BREAKGLASS,ANALYSIS,CONTENT,INDEX,LANGUAGE,SAFERENDER,EDGE ai;
+    class SUPPLIER,EXT external;
+    class RESNOTE warning;
