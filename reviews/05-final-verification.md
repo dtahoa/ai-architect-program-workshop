@@ -1,5 +1,7 @@
 # Final Deliverable Verification After FD-01
 
+> **Historical binary verification.** The current task intentionally excludes `output/`; use [`final-review.md`](final-review.md) for the canonical documentation verdict. This file does not claim to verify later binary timestamps or hashes.
+
 Verification date: 2026-07-17
 
 Scope:

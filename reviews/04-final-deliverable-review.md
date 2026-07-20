@@ -1,5 +1,7 @@
 # Final Deliverable Review - PPTX and PDF
 
+> **Historical binary-deliverable review — superseded by [`05-final-verification.md`](05-final-verification.md) for FD-01 and by [`final-review.md`](final-review.md) for the current documentation set.**
+
 Review date: 2026-07-17
 
 Reviewer role: Final workshop deliverable reviewer

@@ -120,7 +120,7 @@ The quantitative validation phase must show arithmetic for the six-hour window, 
 | BT-03 | Operating cost | Total AI run cost must remain <= $4M/year across forecasting and all other AI capabilities. |
 | BT-04 | Margin | Business net margin is 2.4%; cost must be justified in that context. |
 | BT-05 | Delivery-team size | No Variant B engineering, data-science, platform, SAP-partner, operations, or support-team composition is stated. The 14 engineers, 3 data scientists, and 1 platform engineer are explicitly part of Variant A and must not be imported into Variant B without confirmation. |
-| BT-06 | Workshop team | The group has 5-6 people. The submission contains 6 workshop artifacts, each with one named owner, and must state who owned which artifact. Names are not supplied. |
+| BT-06 | Workshop team | The group has 7 named contributors. The submission contains 6 workshop artifacts, each with one named owner, plus one named presentation integrator. |
 | BT-07 | Presentation format | Maximum 8 slides; 7 minutes presentation, 4 minutes Q&A, 1 minute changeover, within a 12-minute slot. The scenario must not be re-explained. The orchestration brief further constrains planned speaking time to 6 minutes 30 seconds through 7 minutes. |
 | BT-08 | Assignment | Group 4 is assigned Variant B, AI-Retrofit/Legacy. |
 | BT-09 | Schedule | Session 1 is July 28, 2:00-4:00 PM, for Groups 1-8. Opening speech is 2:00-2:05 PM; Group 4's slot is 2:05-2:17 PM, followed by trainer summary and feedback as stated by the user. The calendar year is not stated in the assignment text. |
@@ -152,8 +152,8 @@ The quantitative validation phase must show arithmetic for the six-hour window, 
 | A-01 | Working assumption from the user assignment | The work is for Group 4, Variant B. | Use unless the user changes the assignment. |
 | A-02 | Conservative validation assumption | 27M forecasts/day is binding for capacity and cost validation, even though 640 x 11,000 is 7.04M. | Preserve both figures and seek clarification; do not lower the load silently. |
 | A-03 | Working assumption | $3.2M is a binding Variant B project ceiling. | Do not assume its capex/opex split or 18-month accounting period. |
-| A-04 | Scope assumption not yet approved | All six functional capabilities remain candidates; none has yet been accepted, deferred, or rejected. | Later architecture work must make and defend scope decisions. |
-| A-05 | Ownership assumption | Owner names are unavailable. | Use explicit placeholders only until the group supplies names. |
+| A-04 | Scope assumption at baseline | All six functional capabilities begin as candidates. | **Resolved downstream by registry D-09:** forecasting/replenishment primary, associate copilot a separate pilot, and markdown/substitution/promotion automation deferred. |
+| A-05 | Ownership assignment | Owner names are supplied and fixed for this submission. | Use the roster in `artifacts/02-architecture-decision-summary.md`; no owner placeholders remain. |
 | A-06 | Schedule assumption | July 28 is binding, but no year is inferred. | Confirm the year before calendar-dependent planning. |
 
 ## 8. Explicitly prohibited changes
@@ -196,7 +196,7 @@ The quantitative validation phase must show arithmetic for the six-hour window, 
 | OQ-15 | What data-readiness time, supplier-EDI processing duration, DC processing reserve, and internal stop/abort milestones exist inside 22:00-04:00? | The usable compute window may be materially shorter than six hours. |
 | OQ-16 | What acceptance KPIs apply to markdown, substitutions, and promotion planning beyond the board-level waste and out-of-stock targets? | These capabilities lack explicit quality and business thresholds. |
 | OQ-17 | What legal rights and freshness expectations apply to scraped competitor-pricing data? | Use may introduce market-specific legal and operational risk. |
-| OQ-18 | Which workshop member owns each of the six required artifacts? | The submission requires one named owner per artifact. |
+| OQ-18 | **Resolved:** Which workshop member owns each artifact? | A1 LÊ NGUYỄN SỸ BÌNH; A2 TRẦN THANH PHỤNG; A3 NGUYỄN HÒA; A4 PHẠM THỊ THANH HUYỀN; A5 TRẦM QUỐC THUẬN; A6 TRẦN TRỌNG PHÚ; presentation integrator ĐINH XUÂN DŨNG. |
 | OQ-19 | What calendar year applies to the July 28 presentation schedule, and is Group 4 definitely the first presentation after the opening speech? | Final rehearsal and submission planning require an unambiguous time. |
 | OQ-20 | What baseline and attribution method will determine realized savings and acceptable ROI? | The $241M identified upside is not the same as committed realized benefit. |
 | OQ-21 | The PDF labels NFRs as Section 4 but later references "everything in Section 5 (NFRs)" and "every NFR from Section 5." Should those cross-references be read as all NFRs listed in Section 4? | This baseline assumes yes, but records the source-document numbering inconsistency. |

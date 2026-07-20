@@ -1,5 +1,7 @@
 # NovaMart Group 4 - Red-Team Correction Verification
 
+> **Historical verification record — superseded by [`final-review.md`](final-review.md).** The current artifacts additionally resolve the former RT-06 and RT-07 minor findings.
+
 Verification date: 2026-07-17
 
 Reviewer role: Strict workshop trainer / red-team verifier
@@ -105,24 +107,20 @@ The acceptance test can no longer pass through fast refusal of every query.
 ## Cross-file and arithmetic recheck
 
 - The 27M normal forecast, 7.04M stocked candidate, 162M forecast-equivalent peak, and 42.24M optimization-equivalent peak populations remain consistent.
-- The exact stage-time sum uses unrounded stage values and rounds to 198.7 minutes; the displayed 41.3-minute sidecar headroom is consistent. Summing the already rounded `46.9` and `11.7` table values gives 198.6, which is only a presentation-rounding effect.
+- The stage-precision values are 46.93 and 11.73 minutes; their full sum is 198.66, reported as 198.7. The resulting 41.34-minute sidecar headroom is reported as 41.3, so the displayed arithmetic is reproducible without a presentation-rounding discrepancy.
 - The corrected transaction rates and cap formula are consistent in the architecture summary, flows, NFRs, capacity check, ADR, risk register, Variant B artifact, and consolidated pack.
 - Kill-switch timings are consistently acknowledgement <=30 seconds, new-write rejection <=60 seconds, and verified safe <=5 minutes.
 - The risk register still contains exactly five full risk rows, each with a measurable signal and numeric threshold.
 - Markdown code-fence counts are balanced across artifacts 02-14.
 - Stale searches returned no old 78.2 rows/s/313 rows/s capacity claim, no feature-flag-only kill switch, no pre-publication MERLIN comparison claim, no safety summarization permission, and no acceptance language that lets universal refusal pass.
 
-## Remaining minor items
+## Former minor items
 
-The original RT-06 and RT-07 remain open and do not affect functional, security, safety, arithmetic, or test correctness:
-
-1. The technology matrix still lacks criterion-specific scoring anchors and sensitivity evidence for close decisions.
-2. The top-five risk register still does not show a compact scored disposition for omitted cost, residency, and reviewer-fatigue contenders.
-
-`reviews/02-resolution-log.md` incorrectly relabels these original findings as "Presentation density" and "Terminology density." That is a minor resolution-log traceability error; the original review identifies RT-06 as matrix-score reproducibility and RT-07 as top-five risk-selection evidence.
+- **RT-06 is closed:** the current matrix has shared score anchors, formula, reproducible totals, trade-offs, and sensitivity checks.
+- **RT-07 is closed:** the current register has a scored omitted-contender note, inclusion threshold, and tie-break rule while retaining exactly five full risks.
 
 ## Final verdict
 
-# Ready with minor changes
+# Superseded — see current final review
 
 The Critical and Major correction gate has passed. The architecture artifacts may proceed to the presentation-coach phase. Keep every production claim conditional, and do not present unmeasured MERLIN/SAP behavior as proven. The two remaining minor findings and the resolution-log labels should be corrected if time permits, but they do not block workshop preparation.

@@ -1,10 +1,12 @@
 # NovaMart Group 4 - Red-Team Resolution Log
 
+> **Historical resolution record — superseded by [`final-review.md`](final-review.md).** RT-06 and RT-07 are corrected below for accurate traceability.
+
 Resolution owner: Developer correction pass
 
 Source review: `reviews/01-red-team-review.md`
 
-Status: **RT-01 through RT-05 accepted and resolved in the artifact set. RT-06 and RT-07 were not applied because they are minor presentation/readability suggestions outside the authorized correction scope.** All production claims remain conditional on measured evidence and named-owner approval.
+Status: **RT-01 through RT-07 are resolved in the current canonical artifact set.** All production claims remain conditional on measured evidence and named-owner approval.
 
 ## Finding dispositions
 
@@ -43,19 +45,15 @@ Status: **RT-01 through RT-05 accepted and resolved in the artifact set. RT-06 a
 - Artifacts changed: `artifacts/05-request-and-batch-flows.md`, `07-nfr-table.md`, `08-capacity-and-cost-check.md`, `09-safety-and-governance.md`, `12-risk-register.md`, `13-variant-b-artifact.md`, `14-final-artifact-pack.md`.
 - Final resolution: Offline acceptance requires 100% signed-pack coverage and p95 <=500 ms; eligible non-safety answer coverage >=90% with answer/citation accuracy >=95%; ineligible non-safety refusal precision and recall each >=95%; and safety policy correctness, eligible exact display/citation correctness, and required-refusal precision and recall all 100%. Benchmarks label eligible-answer and required-refusal cases separately. An empty valid pack or universal-refusal implementation fails acceptance.
 
-### RT-06 - Minor - Presentation density
+### RT-06 - Minor - Technology scores were not reproducible enough
 
-- Disposition: **Rejected for this correction pass**
-- Reason: This is a presentation/readability recommendation, not a functional, security, safety, arithmetic, or test-coverage defect. The parent task authorized fixes only for real functional/security/test issues after review.
-- Artifacts changed: None specifically for RT-06.
-- Final resolution: Deferred to presenter rehearsal and slide editing; no architecture claim was changed on this basis.
+- Disposition: **Accepted and resolved**
+- Resolution: `artifacts/10-technology-selection-matrix.md` now defines shared 1/3/5 score anchors, a weighted formula, criteria totaling 100 for three decisions, reproducible totals, accepted trade-offs, and sensitivity tests.
 
-### RT-07 - Minor - Terminology density
+### RT-07 - Minor - The top-five selection lacked omitted-contender evidence
 
-- Disposition: **Rejected for this correction pass**
-- Reason: This is a wording/readability recommendation. Applying it broadly would create unnecessary churn after the critical/major consistency correction.
-- Artifacts changed: None specifically for RT-07.
-- Final resolution: Terms remain defined in their local control/flow context; simplification is deferred to presentation rehearsal.
+- Disposition: **Accepted and resolved**
+- Resolution: `artifacts/12-risk-register.md` now states the inclusion threshold and tie-break rule and scores the omitted residency, cost, reviewer-fatigue, and provider-outage contenders without adding a sixth full risk.
 
 ## Verification record
 

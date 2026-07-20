@@ -1,5 +1,7 @@
 # NovaMart Group 4 - Red-Team Architecture Review
 
+> **Historical review record — superseded by [`final-review.md`](final-review.md).** Findings are retained for traceability; this file's original verdict is not the current verdict.
+
 Reviewer role: Strict workshop trainer / adversarial architecture reviewer
 
 Scope reviewed:
@@ -154,7 +156,7 @@ The pack is not yet ready for the workshop defense because one safety rule direc
 - **Contradiction requiring correction:** The pack says generative safety answers are prohibited while five artifacts allow LLM summarization of safety evidence. See RT-01.
 - **Sequencing contradiction requiring correction:** The pre-generation recommendation store claims a current MERLIN baseline even though the diagrams show the engine produces results only after override-table read. See RT-02.
 - **Arithmetic correction required:** 70,400 rows in a <=60-second atomic lock requires at least 1,173.3 rows/s, not the 78.2 rows/s 15-minute floor used in the capacity row. See RT-04.
-- **No material arithmetic error found** in the 27M/7.04M reconciliation, 162M/42.24M conservative peak, 198.7-minute sum, annual compute total, $3.31242M subtotal, $3.8M target, cost-per-forecast values, or net-margin/ROI ratios. The `198.6` versus `198.7` wording is harmless rounding.
+- **No material arithmetic error found** in the 27M/7.04M reconciliation, 162M/42.24M conservative peak, stage-precision `198.66 -> 198.7`-minute sum and `41.34 -> 41.3`-minute headroom, annual compute total, $3.31242M subtotal, $3.8M target, cost-per-forecast values, or net-margin/ROI ratios.
 
 ## Final verdict
 
