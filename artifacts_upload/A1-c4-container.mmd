@@ -1,0 +1,67 @@
+flowchart TB
+    %% Artifact 1 owner: LÊ NGUYỄN SỸ BÌNH
+    subgraph LEGACY["Legacy boundary - unchanged"]
+        POS["POS<br/>no AI route"]
+        BATCH["Nightly batch<br/>supported snapshot extension"]
+        OVR["Override table<br/>read before generation"]
+        ENGINE["MERLIN min/max engine<br/>authoritative and unmodified"]
+        REVIEW["MERLIN review queue<br/>after generation"]
+        EDI["MERLIN EDI connector<br/>fixed schema / 04:00"]
+    end
+
+    subgraph SIDECAR["AI sidecar boundary - asynchronous and fail-open"]
+        VALIDATE["Snapshot validation<br/>freshness / completeness / residency"]
+        FORECAST["Statistical forecast ML<br/>quantiles / confidence"]
+        OPTIMIZE["Deterministic optimizer<br/>case / shelf-life / interval / DC caps"]
+        ADAPTER["Certified MERLIN adapter<br/>bounded rows / exact ledger"]
+        CONTROL["Disable control<br/>epoch / short permit / independent revoke"]
+        AUDIT["Monitoring and append-only audit"]
+    end
+
+    subgraph DATA["Approved data boundary"]
+        DW["Data warehouse<br/>nightly aggregates"]
+        EXT["Weather / event feeds<br/>validated, non-authoritative"]
+    end
+
+    subgraph COPILOT_ZONE["Separate associate-copilot boundary"]
+        CONTENT["Signed approved evidence"]
+        SAFE["Deterministic safety renderer<br/>exact field/passage + citation"]
+        COPILOT["Store-local retrieval<br/>no POS or ordering link"]
+    end
+
+    subgraph COUNTRY_LOCAL["Country-local personal-data boundary"]
+        LOYALTY["Loyalty PII<br/>excluded from Release 1"]
+    end
+
+    CM["Category Manager"]
+    OPS["Duty Manager"]
+    SUP["Suppliers"]
+    ASSOC["Store Associate"]
+
+    POS -->|"existing sync"| BATCH
+    BATCH -->|"dated read-only snapshot"| VALIDATE
+    DW -->|"approved immutable aggregate"| VALIDATE
+    EXT -->|"optional validated features"| VALIDATE
+    VALIDATE --> FORECAST
+    FORECAST --> OPTIMIZE
+    OPTIMIZE --> ADAPTER
+    CONTROL -->|"permit or deny"| ADAPTER
+    ADAPTER -->|"supported current-run write"| OVR
+    OVR -->|"read before order generation"| ENGINE
+    ENGINE -->|"authoritative order"| EDI
+    ENGINE -->|"post-generation exception"| REVIEW
+    REVIEW -.->|"certified order ID / quantity / correlation"| ADAPTER
+    CM -->|"native decision"| REVIEW
+    REVIEW -->|"native release/correction"| EDI
+    EDI --> SUP
+    OPS -->|"disable request"| CONTROL
+    VALIDATE -.-> AUDIT
+    FORECAST -.-> AUDIT
+    OPTIMIZE -.-> AUDIT
+    ADAPTER -.-> AUDIT
+    CONTROL -.-> AUDIT
+    CONTENT --> SAFE
+    SAFE -->|"exact display or refusal"| COPILOT
+    COPILOT -->|"cited answer or escalation"| ASSOC
+
+    %% No AI container connects to POS, EDI, or suppliers.

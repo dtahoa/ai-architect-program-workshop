@@ -1,0 +1,51 @@
+flowchart LR
+    %% Artifact 1 owner: LÊ NGUYỄN SỸ BÌNH
+    subgraph PEOPLE["People"]
+        CM["Category Manager"]
+        ASSOC["Store Associate"]
+        OPS["Replenishment Operations"]
+    end
+    subgraph LEGACY["On-premises legacy trust boundary"]
+        DW["Data Warehouse<br/>nightly aggregates"]
+        POS["Legacy POS<br/>untouched and offline-first"]
+        MERLIN["MERLIN ERP<br/>authoritative order system"]
+        SNAP["Nightly snapshot extension"]
+        OVT["Override-table extension"]
+        REVIEWQ["Post-generation review queue"]
+        EDI["Existing supplier EDI connector"]
+    end
+    subgraph AI_BOUNDARY["AI retrofit trust boundary"]
+        AI["Fail-open AI Sidecar<br/>advisory forecasting and optimization"]
+        COPILOT["Separate Associate Copilot<br/>read-only; deterministic safety display"]
+        CONTROL["Deny-default disable control<br/>independent SAP revoke"]
+    end
+    subgraph GOVERNED["Governed content boundary"]
+        DOCS["Approved SOP / product evidence"]
+    end
+    subgraph EXTERNAL["External trust boundary"]
+        EXT["Weather / event data<br/>non-authoritative"]
+        SUP["2,300 Suppliers"]
+    end
+
+    POS -->|"existing nightly sync only"| MERLIN
+    MERLIN -->|"dated export"| SNAP
+    SNAP -->|"supported read-only input"| AI
+    DW -->|"approved immutable snapshot"| AI
+    EXT -->|"validated optional features"| AI
+    AI -->|"bounded current-run rows"| OVT
+    OVT -->|"read before generation"| MERLIN
+    MERLIN -->|"generated exception"| REVIEWQ
+    REVIEWQ -->|"native review item"| CM
+    CM -->|"accept / reject / edit"| REVIEWQ
+    MERLIN -->|"authoritative fixed-schema order"| EDI
+    EDI -->|"before 04:00"| SUP
+    OPS -->|"disable request"| CONTROL
+    CONTROL -->|"permit, deny, or revoke adapter access"| AI
+    DOCS -->|"signed exact evidence"| COPILOT
+    COPILOT -->|"cited answer or refusal"| ASSOC
+
+    subgraph COUNTRY_LOCAL["Country-local personal-data boundary"]
+        LOYALTY["Loyalty PII<br/>no Release 1 export"]
+    end
+
+    %% Prohibited by design: AI has no edge to POS, EDI, or suppliers.
