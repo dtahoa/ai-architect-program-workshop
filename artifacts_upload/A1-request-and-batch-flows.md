@@ -24,6 +24,7 @@ Owner: **LÊ NGUYỄN SỸ BÌNH**
 
 The 02:00 close is a proposed gate. Production influence requires measured MERLIN P99 <=90 minutes so at least 30 minutes remain before 04:00; otherwise the close moves earlier. A recovery at 03:30 is rejected as late and cannot trigger a rerun.
 
+Refer [`A1-request-and-batch-flows.pdf`](A1-request-and-batch-flows.pdf)
 ```mermaid
 sequenceDiagram
     participant B as MERLIN nightly batch
