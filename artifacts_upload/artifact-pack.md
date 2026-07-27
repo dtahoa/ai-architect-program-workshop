@@ -1,4 +1,4 @@
-# NovaMart Group 4 - Submission Manifest
+# Workshop 1 - Group 4 - Submission Manifest
 
 Presentation integrator: **ĐINH XUÂN DŨNG**
 
