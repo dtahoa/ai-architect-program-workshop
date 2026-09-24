@@ -647,11 +647,11 @@ Sau khi Codex tạo artifacts, dùng thêm prompt này:
     2. Questions trainers are likely to ask
     3. Required corrections
     4. Final verdict: Ready / Not ready
-    ```
+```
 
     Điểm quan trọng nhất là **không để agent tự tạo slide ngay từ đầu**. Hãy bắt nó đi theo trình tự:
 
-    ```text
+```text
     Extract constraints
     → Decide architecture
     → Prove NFR and cost
